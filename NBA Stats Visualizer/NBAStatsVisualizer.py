@@ -27,59 +27,54 @@ def get_player_info(player_name, season_id, season_progress):
     nba_players = players.get_players()
     player_dict = [player for player in nba_players if player['full_name'] == player_name][0]
 
-    player_regular_info = playercareerstats.PlayerCareerStats(player_id=int(player_dict['id']), per_mode36='PerGame', season_type_all_star=season_progress)
+    player_regular_info = playercareerstats.PlayerCareerStats(player_id=int(player_dict['id']), per_mode36='PerGame')
     player_regular_info_df = player_regular_info.get_data_frames()[0]
 
-    if season_id == 'Career':
-        PTS = float(player_regular_info_df['PTS'])
-        REB = float(player_regular_info_df['REB'])
-        AST = float(player_regular_info_df['AST'])
-        FG_PCT = round(float(player_regular_info_df['FG_PCT']*100), 2)
-        FG3_PCT = round(float(player_regular_info_df['FG3_PCT']*100), 2)
-        FT_PCT = round(float(player_regular_info_df['FT_PCT']*100), 2)
-        STL = float(player_regular_info_df['STL'])
-        BLK = float(player_regular_info_df['BLK'])
-        TOV = float(player_regular_info_df['TOV'])
-    else:
-        season = player_regular_info_df[player_regular_info_df['SEASON_ID'] == season_id]
-        PTS = float(season['PTS'])
-        REB = float(season['REB'])
-        AST = float(season['AST'])
-        FG_PCT = round(float(season['FG_PCT']*100), 2)
-        FG3_PCT = round(float(season['FG3_PCT']*100), 2)
-        FT_PCT = round(float(season['FT_PCT']*100), 2)
-        STL = float(season['STL'])
-        BLK = float(season['BLK'])
-        TOV = float(season['TOV'])
+    season = player_regular_info_df[player_regular_info_df['SEASON_ID'] == season_id]
+    PTS = float(season['PTS'])
+    REB = float(season['REB'])
+    AST = float(season['AST'])
+    FG_PCT = round(float(season['FG_PCT']*100), 2)
+    FG3_PCT = round(float(season['FG3_PCT']*100), 2)
+    FT_PCT = round(float(season['FT_PCT']*100), 2)
+    STL = float(season['STL'])
+    BLK = float(season['BLK'])
+    TOV = float(season['TOV'])
 
     stats = 'PTS: ' + str(PTS)+'\nREB: ' + str(REB)+'\nAST: ' + str(AST)+'\nFG%: ' + str(FG_PCT)+'%\n3PT%: ' + str(FG3_PCT)+'%\nFT%: ' + str(FT_PCT)+'%\nSTL: ' + str(STL)+'\nBLK: ' + str(BLK)+'\nTOV: ' + str(TOV)
 
     return stats
 
 def stats_window(player_name, season_id, season_progress):
-    newWindow = Toplevel(screen)
-    newWindow.geometry('350x290')
-    newWindow.title(player_name + ' Stats ' + season_progress)
-    newWindow.iconbitmap('nba.ico')
-    newWindow.config(background='#17408B')
-    stats_name = player_name + ' ' + season_id + ' Stats'
-    stats = get_player_info(player_name, season_id, season_progress)
-    
-    title = Text(newWindow, height=1, borderwidth=0, font=('Trebuchet MS', 14, 'bold'), background='#17408B', fg='white')
-    title.tag_configure("center", justify='center')
-    title.insert(1.0, stats_name, 'center')
-    title.tag_add("center", "1.0", "end")
-    title.pack(pady=15)
-    title.configure(state="disabled")
-    title.configure(inactiveselectbackground=title.cget("selectbackground"))
+    try:
+        if season_progress != 'Regular Season':
+            popupmsg_stats()
+        else:   
+            stats = get_player_info(player_name, season_id, season_progress)
+            newWindow = Toplevel(screen)
+            newWindow.geometry('350x290')
+            newWindow.title(player_name + ' Stats ' + season_progress)
+            newWindow.iconbitmap('nba.ico')
+            newWindow.config(background='#17408B')
+            stats_name = player_name + ' ' + season_id + ' Stats'
+            
+            title = Text(newWindow, height=1, borderwidth=0, font=('Trebuchet MS', 14, 'bold'), background='#17408B', fg='white')
+            title.tag_configure("center", justify='center')
+            title.insert(1.0, stats_name, 'center')
+            title.tag_add("center", "1.0", "end")
+            title.pack(pady=15)
+            title.configure(state="disabled")
+            title.configure(inactiveselectbackground=title.cget("selectbackground"))
 
-    stats_screen = Text(newWindow, height=9, borderwidth=0, font=('Helvetica', 14), background='#17408B', fg='white')
-    stats_screen.tag_configure("center", justify='center')
-    stats_screen.insert(1.0, stats, 'center')
-    stats_screen.tag_add("center", "1.0", "end")
-    stats_screen.pack(pady=10)
-    stats_screen.configure(state="disabled")
-    stats_screen.configure(inactiveselectbackground=stats_screen.cget("selectbackground"))
+            stats_screen = Text(newWindow, height=9, borderwidth=0, font=('Helvetica', 14), background='#17408B', fg='white')
+            stats_screen.tag_configure("center", justify='center')
+            stats_screen.insert(1.0, stats, 'center')
+            stats_screen.tag_add("center", "1.0", "end")
+            stats_screen.pack(pady=10)
+            stats_screen.configure(state="disabled")
+            stats_screen.configure(inactiveselectbackground=stats_screen.cget("selectbackground"))
+    except:
+        popupmsg_stats()
         
 
 def get_player_shotchartdetail(player_name, season_id, season_progress):
@@ -194,17 +189,11 @@ def popupmsg_shotchart(msg, season_id):
     msg = str(msg)
     if msg == 'list index out of range':
         response = messagebox.showinfo("Error", "It was not possible to create your shot chart:\n\nMake sure you typed the player name correctly")
-    if season_id == 'Career':
-        response = messagebox.showinfo("Error", "It was not possible to create your shot chart:\n\nUnfortunately it's not possible to create a shot chart for the entire career of a player.")
     if msg == "cannot convert the series to <class 'int'>" and season_id != 'Career':
         response = messagebox.showinfo("Error", "It was not possible to create your shot chart:\n\nMake sure you selected a valid season")
 
-def popupmsg_stats(msg):
-    msg = str(msg)
-    if msg == 'list index out of range':
-        response = messagebox.showinfo("Error", "It was not possible to show the stats for this player:\n\nMake sure you typed the player name correctly")
-    if msg == "cannot convert the series to <class 'int'>":
-        response = messagebox.showinfo("Error", "It was not possible to show the stats for this player:\n\nMake sure you selected a valid season")
+def popupmsg_stats():
+    response = messagebox.showinfo("Error", "It was not possible to show the stats for this player:\n\nMake sure you typed the player name correctly and selected a valid season;\nStats are only avaliable for regular season")
 
 def myClick():
     player_name = e.get()
@@ -214,8 +203,8 @@ def myClick():
     season_progress = clicked2.get()
     try:
         stats_window(player_name, season_id, season_progress)
-    except (TypeError, IndexError) as er:
-        popupmsg_stats(er)
+    except:
+        popupmsg_stats()
 
 def myClick2():
     player_name = e.get()
@@ -270,8 +259,7 @@ e.pack()
 e.config(fg='black')
 #e.insert(0, "Player name here") # initial message (optional)
 
-options = ["Career",
-            "1996-97",
+options = ["1996-97",
             "1997-98",
             "1998-99",
             "1999-00",
