@@ -221,14 +221,6 @@ def myClick2():
         plt.show()
     except (TypeError, IndexError) as er:
         popupmsg_shotchart(er, season_id)
-
-def player_stats(player_name, season_id):
-    top = Toplevel()
-    top.title(player_name + ' Stats')
-    top.iconbitmap('nba.ico')
-    lbl = Label(top, text='Hello world').pack()
-    btn = Button(top, text='Close window', command=top.destroy).pack()
-
     
 screen = tk.ThemedTk()
 screen.get_themes()
