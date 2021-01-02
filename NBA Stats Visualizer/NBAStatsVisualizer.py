@@ -282,7 +282,8 @@ options = ["1996-97",
             "2016-17",
             "2017-18",
             "2018-19",
-            "2019-20"] # all seasons with valid data
+            "2019-20",
+            "2020-21"] # all seasons with valid data
 
 clicked = StringVar()
 clicked.set(options[-1:])
