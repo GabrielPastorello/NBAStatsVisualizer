@@ -284,7 +284,7 @@ season_frame = Frame(screen)
 season_frame.pack(pady=20)
 season_frame.config(background='#17408B')
 
-season_frame_ = LabelFrame(season_frame, text="Select a Season:", font=('Helvetica', 10, 'bold'), background='#17408B', fg='white')
+season_frame_ = LabelFrame(season_frame, text="Select a Season:", font=('Helvetica', 10, 'bold'), background='#17408B', fg='white', labelanchor='n')
 season_frame_.grid(row=0, column=0, padx=50)
     
 drop = OptionMenu(season_frame_, clicked, *options)
