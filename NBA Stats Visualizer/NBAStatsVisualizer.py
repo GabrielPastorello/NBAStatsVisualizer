@@ -19,6 +19,7 @@ from matplotlib.patches import PathPatch
 from tkinter import *
 from ttkthemes import themed_tk as tk
 from tkinter import font
+from tkinter import messagebox
 from PIL import ImageTk,Image
 
 def get_player_info(player_name, season_id, season_progress):
