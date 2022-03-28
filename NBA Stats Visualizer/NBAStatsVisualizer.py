@@ -15,6 +15,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.colors import LinearSegmentedColormap, ListedColormap, BoundaryNorm
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
+from qbstyles import mpl_style
 
 from tkinter import *
 from ttkthemes import themed_tk as tk
@@ -22,14 +23,19 @@ from tkinter import font
 from tkinter import messagebox
 from PIL import ImageTk,Image
 
-def get_player_info(player_name, season_id, season_progress):
-
+def get_player(player_name):
     # player dictionary
     nba_players = players.get_players()
     player_dict = [player for player in nba_players if player['full_name'] == player_name][0]
 
     player_regular_info = playercareerstats.PlayerCareerStats(player_id=int(player_dict['id']), per_mode36='PerGame')
     player_regular_info_df = player_regular_info.get_data_frames()[0]
+
+    return player_regular_info_df
+
+def get_player_info(player_name, season_id):
+
+    player_regular_info_df = get_player(player_name)
 
     season = player_regular_info_df[player_regular_info_df['SEASON_ID'] == season_id]
     PTS = float(season['PTS'])
@@ -46,12 +52,19 @@ def get_player_info(player_name, season_id, season_progress):
 
     return stats
 
+def get_player_ppg(player_name):
+    
+    player_regular_info_df = get_player(player_name)
+    player_ppg = player_regular_info_df[['SEASON_ID','PTS']]
+
+    return player_ppg
+
 def stats_window(player_name, season_id, season_progress):
     try:
         if season_progress != 'Regular Season':
             popupmsg_stats()
         else:   
-            stats = get_player_info(player_name, season_id, season_progress)
+            stats = get_player_info(player_name, season_id)
             newWindow = Toplevel(screen)
             newWindow.geometry('350x290')
             newWindow.title(player_name + ' Stats ' + season_progress)
@@ -77,6 +90,36 @@ def stats_window(player_name, season_id, season_progress):
     except:
         popupmsg_stats()
         
+def ppg_window(player_name, season_progress):
+    try:
+        if season_progress != 'Regular Season':
+            popupmsg_ppg()
+        else:   
+            ppg = get_player_ppg(player_name)
+            plt.rcParams['figure.figsize'] = (10,6)
+
+            x = ppg['SEASON_ID']
+            y = ppg['PTS']
+
+            plt.plot(x, y, color='blue' ,marker='o',
+                         markerfacecolor='red', markeredgecolor='red',
+                         linestyle='solid')
+
+            for x1,y1 in zip(x,y):
+                label = "{:.2f}".format(y1)
+                    
+                plt.annotate(label, # this is the text
+                            (x1,y1), # these are the coordinates to position the label
+                            textcoords="offset points", # how to position the text
+                            xytext=(0,5), # distance from text to points (x,y)
+                            ha='center') # horizontal alignment can be left, right or center
+
+            plt.title('PPG Evolution from '+player_name, fontweight='bold')
+            plt.xlabel('Season', fontweight='bold')
+            plt.ylabel('Points per game', fontweight='bold')
+            plt.show()
+    except:
+        popupmsg_ppg()
 
 def get_player_shotchartdetail(player_name, season_id, season_progress):
 
@@ -137,11 +180,13 @@ def draw_court(ax=None, color="blue", lw=1, outer_lines=False):
     for element in court_elements:
         ax.add_patch(element)
 
-def shot_chart(data, title="", color="b", xlim=(-250, 250), ylim=(422.5, -47.5), line_color="#00158f",
+def shot_chart(data, title="", color="b", xlim=(-250, 250), ylim=(422.5, -47.5), line_color="#2948ff",
                court_color="#f5f5f5", court_lw=2, outer_lines=False,
                flip_court=False, gridsize=None,
                ax=None, despine=False):
-
+    
+    plt.rcParams['figure.figsize'] = (8,6)
+    
     if ax is None:
         ax = plt.gca()
         ax.axes.get_xaxis().set_visible(False)
@@ -156,7 +201,7 @@ def shot_chart(data, title="", color="b", xlim=(-250, 250), ylim=(422.5, -47.5),
 
     ax.tick_params(labelbottom="off", labelleft="off")
     ax.set_title(title, fontsize=18)
-
+    
     # draws the court using the draw_court()
     draw_court(ax, color=line_color, lw=court_lw, outer_lines=outer_lines)
 
@@ -196,6 +241,9 @@ def popupmsg_shotchart(msg, season_id):
 def popupmsg_stats():
     response = messagebox.showinfo("Error", "It was not possible to show the stats for this player:\n\nMake sure you typed the player name correctly and selected a valid season;\nStats are only avaliable for regular season")
 
+def popupmsg_ppg():
+    response = messagebox.showinfo("Error", "It was not possible to show the PPG Evolution graph for this player:\n\nMake sure you typed the player name correctly and selected a valid season;\nPPG Evolution graph is only avaliable for regular season")
+
 def myClick():
     player_name = e.get()
     season_id = clicked.get()
@@ -218,17 +266,26 @@ def myClick2():
 
         shot_chart(player_shotchart_df, title=player_name+' Shot Chart ' + season_id + '\n' + season_progress)
 
-        plt.rcParams['figure.figsize'] = (12, 11)
         plt.show()
     except (TypeError, IndexError) as er:
         popupmsg_shotchart(er, season_id)
-    
+
+def myClick3():
+    player_name = e.get()
+    season_progress = clicked2.get()
+    try:
+        ppg_window(player_name, season_progress)
+    except:
+        popupmsg_ppg()
+
+mpl_style(dark=True)
+
 screen = tk.ThemedTk()
 screen.get_themes()
 screen.set_theme("breeze")
 
 width_of_window = 500
-height_of_window = 470
+height_of_window = 510
 
 screen_width = screen.winfo_screenwidth()
 screen_height = screen.winfo_screenheight()
@@ -302,10 +359,13 @@ drop = OptionMenu(season_frame_, clicked2, *reg_or_offs)
 drop.pack(pady=10)
 drop.config(highlightbackground='#17408B', fg='black')
 
-myButton2 = Button(screen, text="View Stats", command=myClick, fg='black', font=('Helvetica', 14, 'bold'))
+myButton2 = Button(screen, text="Show Stats", command=myClick, fg='black', font=('Helvetica', 14, 'bold'))
 myButton2.pack(pady=10)
 
-myButton2 = Button(screen, text="Generate Shot Chart", command=myClick2, fg='black', font=('Helvetica', 14, 'bold'))
+myButton2 = Button(screen, text="Show Shot Chart", command=myClick2, fg='black', font=('Helvetica', 14, 'bold'))
+myButton2.pack(pady=10)
+
+myButton2 = Button(screen, text="Show PPG Evolution", command=myClick3, fg='black', font=('Helvetica', 14, 'bold'))
 myButton2.pack(pady=10)
 
 screen.mainloop()
