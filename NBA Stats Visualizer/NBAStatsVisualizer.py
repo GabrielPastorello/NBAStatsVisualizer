@@ -55,7 +55,7 @@ def get_player_info(player_name, season_id):
 def get_player_ppg(player_name):
     
     player_regular_info_df = get_player(player_name)
-    player_ppg = player_regular_info_df[['SEASON_ID','PTS']]
+    player_ppg = player_regular_info_df[['SEASON_ID','PTS']].drop_duplicates(subset=['SEASON_ID'], keep='last')
 
     return player_ppg
 
@@ -106,7 +106,7 @@ def ppg_window(player_name, season_progress):
                          linestyle='solid')
 
             for x1,y1 in zip(x,y):
-                label = "{:.2f}".format(y1)
+                label = "{:.1f}".format(y1)
                     
                 plt.annotate(label, # this is the text
                             (x1,y1), # these are the coordinates to position the label
