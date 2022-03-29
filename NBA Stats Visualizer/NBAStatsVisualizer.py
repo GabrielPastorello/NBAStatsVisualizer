@@ -365,7 +365,7 @@ myButton2.pack(pady=10)
 myButton2 = Button(screen, text="Show Shot Chart", command=myClick2, fg='black', font=('Helvetica', 14, 'bold'))
 myButton2.pack(pady=10)
 
-myButton2 = Button(screen, text="Show PPG Evolution", command=myClick3, fg='black', font=('Helvetica', 14, 'bold'))
-myButton2.pack(pady=10)
+myButton3 = Button(screen, text="Show PPG Evolution", command=myClick3, fg='black', font=('Helvetica', 14, 'bold'))
+myButton3.pack(pady=10)
 
 screen.mainloop()
