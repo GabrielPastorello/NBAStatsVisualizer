@@ -52,7 +52,7 @@ def get_player_info(player_name, season_id):
     BLK = float(season['BLK'])
     TOV = float(season['TOV'])
 
-    stats = 'Age: '+str(age)+'\nGames Played: '+str(GP)+'\nGames Started: '+str(GS)+'\n\nAverages:\n\nMIN: '+str(MIN)+'\nPTS: '+str(PTS)+'\nREB: '+str(REB)+'\nAST: '+str(AST)+'\nFG%: '+str(FG_PCT)+'%\n3PT%: '+str(FG3_PCT)+'%\nFT%: '+str(FT_PCT)+'%\nSTL: '+str(STL)+'\nBLK: '+str(BLK)+'\nTOV: '+str(TOV)
+    stats = 'Age: '+str(age)+'\nGames Played: '+str(GP)+'\nGames Started: '+str(GS)+'\n\nMIN: '+str(MIN)+'\nPTS: '+str(PTS)+'\nREB: '+str(REB)+'\nAST: '+str(AST)+'\nFG%: '+str(FG_PCT)+'%\n3PT%: '+str(FG3_PCT)+'%\nFT%: '+str(FT_PCT)+'%\nSTL: '+str(STL)+'\nBLK: '+str(BLK)+'\nTOV: '+str(TOV)
 
     return stats
 
@@ -70,7 +70,7 @@ def stats_window(player_name, season_id, season_progress):
         else:   
             stats = get_player_info(player_name, season_id)
             newWindow = Toplevel(screen)
-            newWindow.geometry('350x420')
+            newWindow.geometry('350x400')
             newWindow.title(player_name + ' ' + season_progress + ' Stats')
             newWindow.iconbitmap('nba.ico')
             newWindow.config(background='#17408B')
