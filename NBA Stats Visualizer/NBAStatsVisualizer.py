@@ -29,7 +29,7 @@ def get_player(player_name):
     player_dict = [player for player in nba_players if player['full_name'] == player_name][0]
 
     player_regular_info = playercareerstats.PlayerCareerStats(player_id=int(player_dict['id']), per_mode36='PerGame')
-    player_regular_info_df = player_regular_info.get_data_frames()[0]
+    player_regular_info_df = player_regular_info.get_data_frames()[0].drop_duplicates(subset=['SEASON_ID'], keep='last')
 
     return player_regular_info_df
 
@@ -38,6 +38,10 @@ def get_player_info(player_name, season_id):
     player_regular_info_df = get_player(player_name)
 
     season = player_regular_info_df[player_regular_info_df['SEASON_ID'] == season_id]
+    age = int(season['PLAYER_AGE'])
+    GP = int(season['GP'])
+    GS = int(season['GS'])
+    MIN = round(float(season['MIN']), 2)
     PTS = float(season['PTS'])
     REB = float(season['REB'])
     AST = float(season['AST'])
@@ -48,14 +52,14 @@ def get_player_info(player_name, season_id):
     BLK = float(season['BLK'])
     TOV = float(season['TOV'])
 
-    stats = 'PTS: ' + str(PTS)+'\nREB: ' + str(REB)+'\nAST: ' + str(AST)+'\nFG%: ' + str(FG_PCT)+'%\n3PT%: ' + str(FG3_PCT)+'%\nFT%: ' + str(FT_PCT)+'%\nSTL: ' + str(STL)+'\nBLK: ' + str(BLK)+'\nTOV: ' + str(TOV)
+    stats = 'Age: '+str(age)+'\nGames Played: '+str(GP)+'\nGames Started: '+str(GS)+'\n\nAverages:\n\nMIN: '+str(MIN)+'\nPTS: '+str(PTS)+'\nREB: '+str(REB)+'\nAST: '+str(AST)+'\nFG%: '+str(FG_PCT)+'%\n3PT%: '+str(FG3_PCT)+'%\nFT%: '+str(FT_PCT)+'%\nSTL: '+str(STL)+'\nBLK: '+str(BLK)+'\nTOV: '+str(TOV)
 
     return stats
 
 def get_player_ppg(player_name):
     
     player_regular_info_df = get_player(player_name)
-    player_ppg = player_regular_info_df[['SEASON_ID','PTS']].drop_duplicates(subset=['SEASON_ID'], keep='last')
+    player_ppg = player_regular_info_df[['SEASON_ID','PTS']]
 
     return player_ppg
 
@@ -66,8 +70,8 @@ def stats_window(player_name, season_id, season_progress):
         else:   
             stats = get_player_info(player_name, season_id)
             newWindow = Toplevel(screen)
-            newWindow.geometry('350x290')
-            newWindow.title(player_name + ' Stats ' + season_progress)
+            newWindow.geometry('350x420')
+            newWindow.title(player_name + ' ' + season_progress + ' Stats')
             newWindow.iconbitmap('nba.ico')
             newWindow.config(background='#17408B')
             stats_name = player_name + ' ' + season_id + ' Stats'
@@ -80,7 +84,7 @@ def stats_window(player_name, season_id, season_progress):
             title.configure(state="disabled")
             title.configure(inactiveselectbackground=title.cget("selectbackground"))
 
-            stats_screen = Text(newWindow, height=9, borderwidth=0, font=('Helvetica', 14), background='#17408B', fg='white')
+            stats_screen = Text(newWindow, height=15, borderwidth=0, font=('Helvetica', 14), background='#17408B', fg='white')
             stats_screen.tag_configure("center", justify='center')
             stats_screen.insert(1.0, stats, 'center')
             stats_screen.tag_add("center", "1.0", "end")
@@ -129,7 +133,7 @@ def get_player_shotchartdetail(player_name, season_id, season_progress):
 
     # career dataframe
     career = playercareerstats.PlayerCareerStats(player_id=player_dict['id'])
-    career_df = career.get_data_frames()[0]
+    career_df = career.get_data_frames()[0].drop_duplicates(subset=['SEASON_ID'], keep='last')
 
     # team id during the season
     team_id = career_df[career_df['SEASON_ID'] == season_id]['TEAM_ID']
@@ -217,8 +221,7 @@ def shot_chart(data, title="", color="b", xlim=(-250, 250), ylim=(422.5, -47.5),
     # Plot made shots
     ax.scatter(x_made, y_made, c='g', cmap='coolwarm_r')
 
-    # Set the spines to match the rest of court lines, makes outer_lines
-    # somewhat unnecessary
+    # Set the spines to match the rest of court lines, makes outer_lines, somewhat unnecessary 
     for spine in ax.spines:
         ax.spines[spine].set_lw(court_lw)
         ax.spines[spine].set_color(line_color)
